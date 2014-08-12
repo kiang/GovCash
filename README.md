@@ -3,6 +3,16 @@ GovCash
 
 找出政治獻金有趣的地方
 
+#資料概要
+
+1. 總共有 671186  欄位
+2. 共有  21397  User
+3. 3215688 筆資料
+
+#初步分析
+
+1. [人事費用支出 500,1000 總和統計] (https://github.com/ntuaha/GovCash/blob/master/analysis/walker.csv)
+
 #資料來源
 
 - [ronnywang](http://ronny.tw/)
@@ -41,5 +51,56 @@ GovCash
 - 建議將Vote_Type的欄位再進行一次辨識
 - 原始監察院也有提供不合理的欄位，並非網友輸入有誤（例如：公司統編應為８碼，但卻看見原始資料有超過８碼的可能性)
 - 可參閱 [run4.sql](https://github.com/ntuaha/GovCash/blob/master/sql/run4.sql)
+
+# 執行流程
+
+- 建議安裝**postgresql** 
+- 執行將政治獻金每個頁面代表的候選人資訊讀入
+```sh
+python [絕對路徑]/src/page.py
+```
+- 開始清理資料內容
+```sh
+python [絕對路徑]/src/load_rawdata_1.py [絕對路徑]/data/govcash_txn.csv [絕對路徑]/sql/createRaw_1.sql
+```
+
+
+
+
+- 設定好資料庫之後執行
+
+```sh
+psql -d [library] -f [絕對路徑]/sql/run4.sql
+```
+之後會建立出以下表格，相關表格資訊可以到[Google Doc](https://docs.google.com/spreadsheets/d/15TwXSiI1enBaMWv0WeHTZ3FbLPEmKEAWYGNszDaJXhk/edit#gid=0)
+
+- 接著
+
+- UserInfo
+- TableColumn
+- Votes
+- govcash_txn_ext
+- govcash_txn2
+
+此外為了輸出檔案到指定的目錄下，請先修改`[絕對路徑]/sql/run4.sql`的輸出區塊
+
+- 已辨識完欄位整併
+
+```sh
+python transpose.py [絕對路徑]/sql/GovCash_pre.sql
+```
+
+- 最後整理，添加每個**page**的說明與對應的候選人資訊
+
+```sh
+psql -d govcash -f [絕對路徑]/sql/GovCash.sqls
+```
+
+- 完成，開始利用**GovCash**這張表格做分析吧
+
+
+
+
+
 
 ###有任何問題請直接回報，會加緊除錯提供更完整的資料表
